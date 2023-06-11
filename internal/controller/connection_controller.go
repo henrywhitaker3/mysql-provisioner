@@ -25,7 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
-	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/db"
+	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/handlers"
 )
 
 // ConnectionReconciler reconciles a Connection object
@@ -47,52 +47,8 @@ type ConnectionReconciler struct {
 func (r *ConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
 
-	c := &mysqlprovisionerv1beta1.Connection{}
-	if err := r.Get(ctx, req.NamespacedName, c); err != nil {
-		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
-
-	l.Info("Processing connection")
-
-	// Check if the object is being deleted
-	if !c.ObjectMeta.DeletionTimestamp.IsZero() {
-		l.Info("mysql-provisioner.henrywhitaker.com/connection being deleted")
-	}
-
-	p, err := c.Spec.PasswordSecretRef.GetPassword(ctx, r.Client, c.Namespace)
-	if err != nil {
-		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
-			Status: false,
-			Error:  err.Error(),
-		}
-		err := r.Status().Update(ctx, c)
-		return ctrl.Result{}, err
-	}
-
-	db, err := db.NewDB(c.Spec.User, string(p), c.Spec.Host, c.Spec.Port)
-	if err != nil {
-		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
-			Status: false,
-			Error:  err.Error(),
-		}
-		err = r.Status().Update(ctx, c)
-		return ctrl.Result{}, err
-	}
-
-	if err := db.Ping(ctx); err != nil {
-		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
-			Status: false,
-			Error:  err.Error(),
-		}
-		err := r.Status().Update(ctx, c)
-		return ctrl.Result{}, err
-	}
-
-	c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
-		Status: true,
-	}
-	err = r.Status().Update(ctx, c)
-	return ctrl.Result{}, err
+	h := handlers.NewConnectionHandler(ctx, r.Client, req)
+	return handlers.RunHandler(l, h)
 }
 
 // SetupWithManager sets up the controller with the Manager.

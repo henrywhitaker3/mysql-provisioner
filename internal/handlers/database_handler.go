@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"time"
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
 	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/db"
@@ -83,6 +84,7 @@ func (h *DatabaseHandler) RemoveFinalizer(finalizer string) error {
 func (h *DatabaseHandler) SuccessStatus() error {
 	h.obj.Status = mysqlprovisionerv1beta1.DatabaseStatus{
 		Created: true,
+		Time:    time.Now().UTC().Format(time.RFC3339),
 	}
 	return h.client.SubResource("status").Update(h.ctx, h.obj)
 }
@@ -91,6 +93,7 @@ func (h *DatabaseHandler) ErrorStatus(err error) error {
 	h.obj.Status = mysqlprovisionerv1beta1.DatabaseStatus{
 		Created: true,
 		Error:   err.Error(),
+		Time:    time.Now().UTC().Format(time.RFC3339),
 	}
 	return h.client.SubResource("status").Update(h.ctx, h.obj)
 }
