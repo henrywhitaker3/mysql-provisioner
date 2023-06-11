@@ -28,8 +28,14 @@ type ConnectionSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Connection. Edit connection_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// The user to connect to the mysql instance with.
+	User              string `json:"user"`
+	PasswordSecretRef struct {
+		// The name of the secret
+		Name string `json:"name"`
+		// The key of the field containing the password
+		Key string `json:"key"`
+	} `json:"passwordSecretRef"`
 }
 
 // ConnectionStatus defines the observed state of Connection
