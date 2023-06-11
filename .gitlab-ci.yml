@@ -3,13 +3,13 @@ stages:
   - release
 
 .rules:
-  # rules:
-  #   - if: $CI_COMMIT_TAG =~ "/^v[0-9]+[.][0-9]+[.][0-9]+$/"
+  rules:
+    - if: $CI_COMMIT_TAG =~ "/^v[0-9]+[.][0-9]+[.][0-9]+$/"
 
 goreleaser:
   stage: release
-  extends:
-    - .rules
+  # extends:
+  #   - .rules
   image: docker:stable
   services:
     - docker:dind
