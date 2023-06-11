@@ -41,12 +41,12 @@ func (d *DB) DropDB(ctx context.Context, name string) error {
 }
 
 func (d *DB) CreateUser(ctx context.Context, name, password, host string) error {
-	_, err := d.conn.ExecContext(ctx, "CREATE USER ?@? identified by ?", name, host, password)
+	_, err := d.conn.ExecContext(ctx, fmt.Sprintf("CREATE USER '%s'@'%s' identified by '%s'", name, host, password))
 	return err
 }
 
 func (d *DB) DropUser(ctx context.Context, name, host string) error {
-	_, err := d.conn.ExecContext(ctx, "DROP USER ?@?", name, host)
+	_, err := d.conn.ExecContext(ctx, fmt.Sprintf("DROP USER '%s'@'%s'", name, host))
 	return err
 }
 

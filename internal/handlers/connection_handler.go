@@ -35,7 +35,7 @@ func (h *ConnectionHandler) Get() error {
 	return nil
 }
 
-func (h *ConnectionHandler) Create() error {
+func (h *ConnectionHandler) CreateOrUpdate() error {
 	db, err := h.getDatabase()
 	if err != nil {
 		return err
@@ -46,10 +46,6 @@ func (h *ConnectionHandler) Create() error {
 		return err
 	}
 
-	return nil
-}
-
-func (h *ConnectionHandler) Update() error {
 	return nil
 }
 

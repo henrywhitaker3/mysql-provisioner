@@ -35,7 +35,7 @@ func (h *UserHandler) Get() error {
 	return nil
 }
 
-func (h *UserHandler) Create() error {
+func (h *UserHandler) CreateOrUpdate() error {
 	db, err := h.getDatabase()
 	if err != nil {
 		return err
@@ -53,10 +53,6 @@ func (h *UserHandler) Create() error {
 
 	// TODO: add grants
 
-	return nil
-}
-
-func (h *UserHandler) Update() error {
 	return nil
 }
 

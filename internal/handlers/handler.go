@@ -15,10 +15,8 @@ var (
 type Handler interface {
 	// Check the object exists
 	Get() error
-	// Code to execute when the resource is first created
-	Create() error
-	// Code to execute when the resource is updated
-	Update() error
+	// Code to execute when the resource is created/updated
+	CreateOrUpdate() error
 	// Code to execute when the resource is deleted
 	Delete() error
 	// Is the objects deletion timestamp zero?
@@ -55,13 +53,11 @@ func RunHandler(l logr.Logger, h Handler) (reconcile.Result, error) {
 		}
 	}
 
-	if err := h.Create(); err != nil {
+	if err := h.CreateOrUpdate(); err != nil {
 		h.ErrorStatus(err)
 		return ctrl.Result{}, err
 	}
 
 	err := h.SuccessStatus()
 	return ctrl.Result{}, err
-
-	// TODO: handling for differing between update/delete
 }

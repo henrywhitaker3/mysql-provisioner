@@ -36,7 +36,7 @@ func (h *DatabaseHandler) Get() error {
 	return nil
 }
 
-func (h *DatabaseHandler) Create() error {
+func (h *DatabaseHandler) CreateOrUpdate() error {
 	db, err := h.getDatabase()
 	if err != nil {
 		return err
@@ -47,10 +47,6 @@ func (h *DatabaseHandler) Create() error {
 		return err
 	}
 
-	return nil
-}
-
-func (h *DatabaseHandler) Update() error {
 	return nil
 }
 
