@@ -21,3 +21,7 @@ tasks:
     cmds:
       - kubectl delete -f config/samples/mysql-provisioner_v1beta1_database.yaml
       - ./bin/kustomize build config/samples/ | kubectl delete -f -
+
+  generate:chart:
+    cmds:
+      - make helm
