@@ -22,11 +22,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
-	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/misc"
+	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/handlers"
 )
 
 // UserReconciler reconciles a User object
@@ -47,71 +46,8 @@ type UserReconciler struct {
 func (r *UserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
 
-	u := &mysqlprovisionerv1beta1.User{}
-	if err := r.Get(ctx, req.NamespacedName, u); err != nil {
-		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
-
-	l.Info("Processing user")
-
-	db, err := getDBForConnection(ctx, r.Client, u.Spec.ConnRef)
-	if err != nil {
-		u.Status = mysqlprovisionerv1beta1.UserStatus{
-			Created: false,
-			Error:   err.Error(),
-		}
-		err := r.Status().Update(ctx, u)
-		return ctrl.Result{}, err
-	}
-	defer db.Close()
-
-	// Check if the object is being deleted
-	if !u.ObjectMeta.DeletionTimestamp.IsZero() {
-		if misc.ContainsString(u.GetFinalizers(), fn) {
-			l.Info("propogating user deletion")
-			if u.Status.Created {
-				if err := db.DropUser(ctx, u.Spec.Name, u.Spec.Host); err != nil {
-					u.Status = mysqlprovisionerv1beta1.UserStatus{
-						Created: u.Status.Created,
-						Error:   err.Error(),
-					}
-					err := r.Status().Update(ctx, u)
-					return ctrl.Result{}, err
-				}
-			}
-
-			controllerutil.RemoveFinalizer(u, fn)
-			err := r.Update(ctx, u)
-			return ctrl.Result{}, err
-		}
-
-		return ctrl.Result{}, nil
-	}
-
-	pw, err := u.Spec.PasswordSecretRef.GetPassword(ctx, r.Client, u.Namespace)
-	if err != nil {
-		u.Status = mysqlprovisionerv1beta1.UserStatus{
-			Created: false,
-			Error:   err.Error(),
-		}
-		err := r.Status().Update(ctx, u)
-		return ctrl.Result{}, err
-	}
-
-	if err := db.CreateUser(ctx, u.Spec.Name, pw, u.Spec.Host); err != nil {
-		u.Status = mysqlprovisionerv1beta1.UserStatus{
-			Created: false,
-			Error:   err.Error(),
-		}
-		err := r.Status().Update(ctx, u)
-		return ctrl.Result{}, err
-	}
-
-	u.Status = mysqlprovisionerv1beta1.UserStatus{
-		Created: true,
-	}
-	err = r.Status().Update(ctx, u)
-	return ctrl.Result{}, err
+	h := handlers.NewUserHandler(ctx, r.Client, req)
+	return handlers.RunHandler(l, h)
 }
 
 // SetupWithManager sets up the controller with the Manager.

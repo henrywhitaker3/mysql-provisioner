@@ -20,18 +20,12 @@ import (
 	"context"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
-	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/db"
 	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/handlers"
-)
-
-var (
-	fn string = "mysql-provisioner.henrywhitaker.com/propogate"
 )
 
 // DatabaseReconciler reconciles a Database object
@@ -61,23 +55,4 @@ func (r *DatabaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mysqlprovisionerv1beta1.Database{}).
 		Complete(r)
-}
-
-func getDBForConnection(ctx context.Context, client client.Client, connRef mysqlprovisionerv1beta1.ConnectionRef) (*db.DB, error) {
-	conn := &mysqlprovisionerv1beta1.Connection{}
-	err := client.Get(ctx, types.NamespacedName{Namespace: connRef.Namespace, Name: connRef.Name}, conn)
-	if err != nil {
-		return nil, err
-	}
-
-	p, err := conn.Spec.PasswordSecretRef.GetPassword(ctx, client, conn.Namespace)
-	if err != nil {
-		return nil, err
-	}
-	db, err := db.NewDB(conn.Spec.User, p, conn.Spec.Host, conn.Spec.Port)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
 }
