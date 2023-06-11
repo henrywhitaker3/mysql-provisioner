@@ -42,8 +42,8 @@ type DatabaseSpec struct {
 
 // DatabaseStatus defines the observed state of Database
 type DatabaseStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Created bool   `json:"created"`
+	Error   string `json:"error"`
 }
 
 //+kubebuilder:object:root=true

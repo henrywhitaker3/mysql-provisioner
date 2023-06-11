@@ -18,15 +18,16 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
+	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/db"
 	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/misc"
 )
 
@@ -59,18 +60,54 @@ func (r *DatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	l.Info("Processing database")
 
+	db, err := getDBForConnection(ctx, r.Client, d.Spec.ConnRef)
+	if err != nil {
+		d.Status = mysqlprovisionerv1beta1.DatabaseStatus{
+			Created: false,
+			Error:   err.Error(),
+		}
+		err := r.Status().Update(ctx, d)
+		return ctrl.Result{}, err
+	}
+	defer db.Close()
+
 	// Check if the object is being deleted
 	if !d.ObjectMeta.DeletionTimestamp.IsZero() {
 		l.Info("mysql-provisioner.henrywhitaker.com/database being deleted")
 		if misc.ContainsString(d.GetFinalizers(), fn) {
-			fmt.Println("TODO: add code to drop db in mysql")
+			if d.Status.Created {
+				if err := db.DropDB(ctx, d.Spec.Name); err != nil {
+					d.Status = mysqlprovisionerv1beta1.DatabaseStatus{
+						Created: d.Status.Created,
+						Error:   err.Error(),
+					}
+					err := r.Status().Update(ctx, d)
+					return ctrl.Result{}, err
+				}
+			}
+
 			controllerutil.RemoveFinalizer(d, fn)
 			err := r.Update(ctx, d)
 			return ctrl.Result{}, err
 		}
+
+		return ctrl.Result{}, nil
 	}
 
-	return ctrl.Result{}, nil
+	if err := db.CreateDB(ctx, d.Spec.Name); err != nil {
+		d.Status = mysqlprovisionerv1beta1.DatabaseStatus{
+			Created: false,
+			Error:   err.Error(),
+		}
+		err := r.Status().Update(ctx, d)
+		return ctrl.Result{}, err
+	}
+
+	d.Status = mysqlprovisionerv1beta1.DatabaseStatus{
+		Created: true,
+	}
+	err = r.Status().Update(ctx, d)
+	return ctrl.Result{}, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -78,4 +115,23 @@ func (r *DatabaseReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mysqlprovisionerv1beta1.Database{}).
 		Complete(r)
+}
+
+func getDBForConnection(ctx context.Context, client client.Client, connRef mysqlprovisionerv1beta1.ConnectionRef) (*db.DB, error) {
+	conn := &mysqlprovisionerv1beta1.Connection{}
+	err := client.Get(ctx, types.NamespacedName{Namespace: connRef.Namespace, Name: connRef.Name}, conn)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := conn.GetPassword(ctx, client)
+	if err != nil {
+		return nil, err
+	}
+	db, err := db.NewDB(conn.Spec.User, p, conn.Spec.Host, conn.Spec.Port)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
