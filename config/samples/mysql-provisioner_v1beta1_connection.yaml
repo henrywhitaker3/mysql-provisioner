@@ -1,3 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: password-sample
+data:
+  password: Ym9uZ28= # plaintext: bongo
+---
 apiVersion: mysql-provisioner.henrywhitaker.com/v1beta1
 kind: Connection
 metadata:
@@ -9,4 +16,7 @@ metadata:
     app.kubernetes.io/created-by: mysql-provisioner
   name: connection-sample
 spec:
-  # TODO(user): Add fields here
+  user: henry
+  passwordSecretRef:
+    name: password-sample
+    key: password
