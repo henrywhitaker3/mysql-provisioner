@@ -41,7 +41,7 @@ func (d *DB) DropDB(ctx context.Context, name string) error {
 }
 
 func (d *DB) CreateUser(ctx context.Context, name, password, host string) error {
-	_, err := d.conn.ExecContext(ctx, fmt.Sprintf("CREATE USER '%s'@'%s' identified by '%s'", name, host, password))
+	_, err := d.conn.ExecContext(ctx, fmt.Sprintf("CREATE USER IF NOT EXISTS '%s'@'%s' identified by '%s'", name, host, password))
 	return err
 }
 

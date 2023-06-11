@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/created-by: mysql-provisioner
   name: user-sample
 spec:
-  name: sample
+  name: sample-user
   host: "%"
   connectionRef:
     name: connection-sample
