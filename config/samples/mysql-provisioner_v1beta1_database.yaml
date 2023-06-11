@@ -8,5 +8,10 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: mysql-provisioner
   name: database-sample
+  finalizers:
+    - mysql-provisioner.henrywhitaker.com/propogate
 spec:
-  # TODO(user): Add fields here
+  name: bongos
+  connection:
+    name: connection-sample
+    namespace: default

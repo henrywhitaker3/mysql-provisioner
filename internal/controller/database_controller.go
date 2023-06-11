@@ -18,13 +18,20 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
+	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/misc"
+)
+
+var (
+	fn string = "mysql-provisioner.henrywhitaker.com/propogate"
 )
 
 // DatabaseReconciler reconciles a Database object
@@ -39,17 +46,29 @@ type DatabaseReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Database object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.4/pkg/reconcile
 func (r *DatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	l := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	d := &mysqlprovisionerv1beta1.Database{}
+	if err := r.Get(ctx, req.NamespacedName, d); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	l.Info("Processing database")
+
+	// Check if the object is being deleted
+	if !d.ObjectMeta.DeletionTimestamp.IsZero() {
+		l.Info("mysql-provisioner.henrywhitaker.com/database being deleted")
+		if misc.ContainsString(d.GetFinalizers(), fn) {
+			fmt.Println("TODO: add code to drop db in mysql")
+			controllerutil.RemoveFinalizer(d, fn)
+			err := r.Update(ctx, d)
+			return ctrl.Result{}, err
+		}
+	}
 
 	return ctrl.Result{}, nil
 }

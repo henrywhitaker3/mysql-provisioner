@@ -30,6 +30,16 @@ func (d *DB) Ping(ctx context.Context) error {
 	return nil
 }
 
+func (d *DB) CreateDB(ctx context.Context, name string) error {
+	_, err := d.conn.ExecContext(ctx, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", name))
+	return err
+}
+
+func (d *DB) DropDB(ctx context.Context, name string) error {
+	_, err := d.conn.ExecContext(ctx, fmt.Sprintf("DROP DATABASE IF EXISTS %s;", name))
+	return err
+}
+
 // Close the connection
 func (d *DB) Close() error {
 	return d.conn.Close()

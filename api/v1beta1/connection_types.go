@@ -17,7 +17,12 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
+
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -62,6 +67,28 @@ type Connection struct {
 
 	Spec   ConnectionSpec   `json:"spec,omitempty"`
 	Status ConnectionStatus `json:"status,omitempty"`
+}
+
+func (c *Connection) GetPassword(ctx context.Context, client client.Client) (string, error) {
+	s := &v1.Secret{}
+	err := client.Get(
+		ctx,
+		types.NamespacedName{
+			Namespace: c.Namespace,
+			Name:      c.Spec.PasswordSecretRef.Name,
+		},
+		s,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	p, ok := s.Data[c.Spec.PasswordSecretRef.Key]
+	if !ok {
+		return "", err
+	}
+
+	return string(p), nil
 }
 
 //+kubebuilder:object:root=true

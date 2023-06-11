@@ -19,9 +19,7 @@ package controller
 import (
 	"context"
 
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -61,29 +59,11 @@ func (r *ConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		l.Info("mysql-provisioner.henrywhitaker.com/connection being deleted")
 	}
 
-	s := &v1.Secret{}
-	err := r.Get(
-		ctx,
-		types.NamespacedName{
-			Namespace: c.Namespace,
-			Name:      c.Spec.PasswordSecretRef.Name,
-		},
-		s,
-	)
+	p, err := c.GetPassword(ctx, r.Client)
 	if err != nil {
 		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
 			Status: false,
 			Error:  err.Error(),
-		}
-		err := r.Status().Update(ctx, c)
-		return ctrl.Result{}, err
-	}
-
-	p, ok := s.Data[c.Spec.PasswordSecretRef.Key]
-	if !ok {
-		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
-			Status: false,
-			Error:  "secret key not found",
 		}
 		err := r.Status().Update(ctx, c)
 		return ctrl.Result{}, err
