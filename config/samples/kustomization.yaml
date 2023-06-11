@@ -2,4 +2,5 @@
 resources:
 - mysql-provisioner_v1beta1_connection.yaml
 - mysql-provisioner_v1beta1_database.yaml
+- mysql-provisioner_v1beta1_user.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
