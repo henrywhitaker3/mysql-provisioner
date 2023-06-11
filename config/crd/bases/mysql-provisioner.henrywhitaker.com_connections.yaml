@@ -35,6 +35,9 @@ spec:
           spec:
             description: ConnectionSpec defines the desired state of Connection
             properties:
+              host:
+                description: Hostname of the mysql instance
+                type: string
               passwordSecretRef:
                 properties:
                   key:
@@ -47,15 +50,29 @@ spec:
                 - key
                 - name
                 type: object
+              port:
+                description: Port number the mysql instanceis listening on
+                type: integer
               user:
                 description: The user to connect to the mysql instance with.
                 type: string
             required:
+            - host
             - passwordSecretRef
+            - port
             - user
             type: object
           status:
             description: ConnectionStatus defines the observed state of Connection
+            properties:
+              error:
+                type: string
+              status:
+                description: True if the connection is successful, false if not
+                type: boolean
+            required:
+            - error
+            - status
             type: object
         type: object
     served: true

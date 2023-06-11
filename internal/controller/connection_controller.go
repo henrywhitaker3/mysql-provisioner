@@ -18,9 +18,10 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -37,6 +38,7 @@ type ConnectionReconciler struct {
 //+kubebuilder:rbac:groups=mysql-provisioner.henrywhitaker.com,resources=connections,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=mysql-provisioner.henrywhitaker.com,resources=connections/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=mysql-provisioner.henrywhitaker.com,resources=connections/finalizers,verbs=update
+//+kubebuilder:rbac:groups=*,resources=secrets,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -46,21 +48,58 @@ type ConnectionReconciler struct {
 func (r *ConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
 
-	d := &mysqlprovisionerv1beta1.Connection{}
-	if err := r.Get(ctx, req.NamespacedName, d); err != nil {
+	c := &mysqlprovisionerv1beta1.Connection{}
+	if err := r.Get(ctx, req.NamespacedName, c); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	// Check if the object is being deleted
-	if !d.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !c.ObjectMeta.DeletionTimestamp.IsZero() {
 		l.Info("mysql-provisioner.henrywhitaker.com/connection being deleted")
 	}
 
-	fmt.Println(d)
+	s := &v1.Secret{}
+	err := r.Get(
+		ctx,
+		types.NamespacedName{
+			Namespace: c.Namespace,
+			Name:      c.Spec.PasswordSecretRef.Name,
+		},
+		s,
+	)
+	if err != nil {
+		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
+			Status: false,
+			Error:  err.Error(),
+		}
+		err := r.Status().Update(ctx, c)
+		return ctrl.Result{}, err
+	}
 
-	// Handle creating whatever resource we need to
+	p, ok := s.Data[c.Spec.PasswordSecretRef.Key]
+	if !ok {
+		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
+			Status: false,
+			Error:  "secret key not found",
+		}
+		err := r.Status().Update(ctx, c)
+		return ctrl.Result{}, err
+	}
 
-	return ctrl.Result{}, nil
+	if err := testConnection(c, string(p)); err != nil {
+		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
+			Status: false,
+			Error:  err.Error(),
+		}
+		err := r.Status().Update(ctx, c)
+		return ctrl.Result{}, err
+	}
+
+	c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
+		Status: true,
+	}
+	err = r.Status().Update(ctx, c)
+	return ctrl.Result{}, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -68,4 +107,8 @@ func (r *ConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mysqlprovisionerv1beta1.Connection{}).
 		Complete(r)
+}
+
+func testConnection(conn *mysqlprovisionerv1beta1.Connection, password string) error {
+	return nil
 }

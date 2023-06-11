@@ -35,6 +35,11 @@ type ConnectionSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	// Hostname of the mysql instance
+	Host string `json:"host"`
+	// Port number the mysql instanceis listening on
+	Port int `json:"port"`
+
 	// The user to connect to the mysql instance with.
 	User              string            `json:"user"`
 	PasswordSecretRef PasswordSecretRef `json:"passwordSecretRef"`
@@ -42,8 +47,9 @@ type ConnectionSpec struct {
 
 // ConnectionStatus defines the observed state of Connection
 type ConnectionStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// True if the connection is successful, false if not
+	Status bool   `json:"status"`
+	Error  string `json:"error"`
 }
 
 //+kubebuilder:object:root=true

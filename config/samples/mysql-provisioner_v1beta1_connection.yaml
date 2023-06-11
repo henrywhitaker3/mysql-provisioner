@@ -16,6 +16,8 @@ metadata:
     app.kubernetes.io/created-by: mysql-provisioner
   name: connection-sample
 spec:
+  host: "10.0.0.30"
+  port: 3306
   user: henry
   passwordSecretRef:
     name: password-sample
