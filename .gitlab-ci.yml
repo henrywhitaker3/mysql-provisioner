@@ -18,6 +18,7 @@ goreleaser:
     DOCKER_USERNAME: $CI_REGISTRY_USER
     DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
     GIT_DEPTH: 0
+    GORELEASER_DOCKER_EXTRA_ARGS: --entrypoint /bin/sh
   script: |
     docker run --rm --privileged \
       -v $PWD:$PWD \
@@ -27,9 +28,9 @@ goreleaser:
       -e GITLAB_TOKEN -e CI_REGISTRY_IMAGE \
       -e CI_SERVER_URL \
       ${GORELEASER_DOCKER_EXTRA_ARGS:-} \
-      pwd
+      goreleaser/goreleaser:latest \
+      -c pwd && \
       ls
-# goreleaser/goreleaser:latest \
-# release \
-# --clean \
-# ${GORELEASER_EXTRA_ARGS:-}
+  # release \
+  # --clean \
+  # ${GORELEASER_EXTRA_ARGS:-}
