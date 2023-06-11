@@ -15,12 +15,15 @@ tasks:
 
   apply:
     cmds:
-      - ./bin/kustomize build config/samples/ | kubectl apply -f -
+      - kubectl apply -f config/samples/mysql-provisioner_v1beta1_connection.yaml
+      - kubectl apply -f config/samples/mysql-provisioner_v1beta1_database.yaml
+      - kubectl apply -f config/samples/mysql-provisioner_v1beta1_user.yaml
 
   delete:
     cmds:
       - kubectl delete -f config/samples/mysql-provisioner_v1beta1_database.yaml
-      - ./bin/kustomize build config/samples/ | kubectl delete -f -
+      - kubectl delete -f config/samples/mysql-provisioner_v1beta1_user.yaml
+      - kubectl delete -f config/samples/mysql-provisioner_v1beta1_connection.yaml
 
   generate:chart:
     cmds:

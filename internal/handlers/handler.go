@@ -1,8 +1,13 @@
 package handlers
 
 import (
+	"context"
+
 	"github.com/go-logr/logr"
+	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
+	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/db"
 	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/misc"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -60,4 +65,23 @@ func RunHandler(l logr.Logger, h Handler) (reconcile.Result, error) {
 
 	err := h.SuccessStatus()
 	return ctrl.Result{}, err
+}
+
+func getDBForConnection(ctx context.Context, client client.Client, connRef mysqlprovisionerv1beta1.ConnectionRef) (*db.DB, error) {
+	conn := &mysqlprovisionerv1beta1.Connection{}
+	err := client.Get(ctx, types.NamespacedName{Namespace: connRef.Namespace, Name: connRef.Name}, conn)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := conn.Spec.PasswordSecretRef.GetPassword(ctx, client, conn.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	db, err := db.NewDB(conn.Spec.User, p, conn.Spec.Host, conn.Spec.Port)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }

@@ -112,7 +112,7 @@ func (h *UserHandler) ErrorStatus(err error) error {
 func (h *UserHandler) getDatabase() (*db.DB, error) {
 	db, err := getDBForConnection(h.ctx, h.client, h.obj.Spec.ConnRef)
 	if err != nil {
-		return nil, h.ErrorStatus(err)
+		return nil, err
 	}
 	return db, nil
 }

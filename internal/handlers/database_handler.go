@@ -6,7 +6,6 @@ import (
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
 	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/db"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -99,26 +98,7 @@ func (h *DatabaseHandler) ErrorStatus(err error) error {
 func (h *DatabaseHandler) getDatabase() (*db.DB, error) {
 	db, err := getDBForConnection(h.ctx, h.client, h.obj.Spec.ConnRef)
 	if err != nil {
-		return nil, h.ErrorStatus(err)
-	}
-	return db, nil
-}
-
-func getDBForConnection(ctx context.Context, client client.Client, connRef mysqlprovisionerv1beta1.ConnectionRef) (*db.DB, error) {
-	conn := &mysqlprovisionerv1beta1.Connection{}
-	err := client.Get(ctx, types.NamespacedName{Namespace: connRef.Namespace, Name: connRef.Name}, conn)
-	if err != nil {
 		return nil, err
 	}
-
-	p, err := conn.Spec.PasswordSecretRef.GetPassword(ctx, client, conn.Namespace)
-	if err != nil {
-		return nil, err
-	}
-	db, err := db.NewDB(conn.Spec.User, p, conn.Spec.Host, conn.Spec.Port)
-	if err != nil {
-		return nil, err
-	}
-
 	return db, nil
 }
