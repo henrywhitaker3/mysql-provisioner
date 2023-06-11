@@ -54,6 +54,8 @@ func (r *ConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	l.Info("Processing connection")
+
 	// Check if the object is being deleted
 	if !c.ObjectMeta.DeletionTimestamp.IsZero() {
 		l.Info("mysql-provisioner.henrywhitaker.com/connection being deleted")
