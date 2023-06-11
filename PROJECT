@@ -2,9 +2,19 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: my.domain
+domain: henrywhitaker.com
 layout:
 - go.kubebuilder.io/v4
 projectName: mysql-provisioner
 repo: gitlab.com/henrywhitaker3/mysql-provisioner
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: henrywhitaker.com
+  group: mysql-provisioner
+  kind: Connection
+  path: gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1
+  version: v1beta1
 version: "3"
