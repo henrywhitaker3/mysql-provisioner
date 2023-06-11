@@ -41,6 +41,7 @@ func (h *DatabaseHandler) Create() error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	if err := db.CreateDB(h.ctx, h.obj.Spec.Name); err != nil {
 		return err
@@ -58,6 +59,7 @@ func (h *DatabaseHandler) Delete() error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	if h.obj.Status.Created {
 		if err := db.DropDB(h.ctx, h.obj.Spec.Name); err != nil {

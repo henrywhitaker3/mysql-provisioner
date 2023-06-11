@@ -40,6 +40,7 @@ func (h *ConnectionHandler) Create() error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	if err := db.Ping(h.ctx); err != nil {
 		return err

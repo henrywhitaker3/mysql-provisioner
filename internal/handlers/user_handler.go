@@ -40,6 +40,7 @@ func (h *UserHandler) Create() error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	pw, err := h.obj.Spec.PasswordSecretRef.GetPassword(h.ctx, h.client, h.obj.Namespace)
 	if err != nil {
@@ -64,6 +65,7 @@ func (h *UserHandler) Delete() error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	if err := db.DropUser(h.ctx, h.obj.Spec.Name, h.obj.Spec.Host); err != nil {
 		return err
