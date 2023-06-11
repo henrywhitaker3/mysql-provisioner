@@ -18,6 +18,10 @@ package controller
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
+
+	_ "github.com/go-sql-driver/mysql"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -86,7 +90,7 @@ func (r *ConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	if err := testConnection(c, string(p)); err != nil {
+	if err := testConnection(ctx, c, string(p)); err != nil {
 		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
 			Status: false,
 			Error:  err.Error(),
@@ -109,6 +113,16 @@ func (r *ConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func testConnection(conn *mysqlprovisionerv1beta1.Connection, password string) error {
+func testConnection(ctx context.Context, conn *mysqlprovisionerv1beta1.Connection, password string) error {
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/information_schema", conn.Spec.User, password, conn.Spec.Host, conn.Spec.Port))
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	if err := db.PingContext(ctx); err != nil {
+		return err
+	}
+
 	return nil
 }
