@@ -42,7 +42,9 @@ type ConnectionSpec struct {
 type ConnectionStatus struct {
 	// True if the connection is successful, false if not
 	Status bool   `json:"status"`
-	Error  string `json:"error"`
+	Time   string `json:"time"`
+	//+optional
+	Error string `json:"error,omitempty"`
 }
 
 //+kubebuilder:object:root=true

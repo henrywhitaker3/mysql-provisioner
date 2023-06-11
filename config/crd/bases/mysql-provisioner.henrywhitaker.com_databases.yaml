@@ -61,9 +61,11 @@ spec:
                 type: boolean
               error:
                 type: string
+              time:
+                type: string
             required:
             - created
-            - error
+            - time
             type: object
         type: object
     served: true

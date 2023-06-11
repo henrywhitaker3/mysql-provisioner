@@ -49,7 +49,9 @@ type UserSpec struct {
 // UserStatus defines the observed state of User
 type UserStatus struct {
 	Created bool   `json:"created"`
-	Error   string `json:"error"`
+	Time    string `json:"time"`
+	//+optional
+	Error string `json:"error,omitempty"`
 }
 
 //+kubebuilder:object:root=true

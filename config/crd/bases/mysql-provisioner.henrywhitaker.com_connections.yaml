@@ -70,9 +70,11 @@ spec:
               status:
                 description: True if the connection is successful, false if not
                 type: boolean
+              time:
+                type: string
             required:
-            - error
             - status
+            - time
             type: object
         type: object
     served: true

@@ -36,7 +36,9 @@ type DatabaseSpec struct {
 // DatabaseStatus defines the observed state of Database
 type DatabaseStatus struct {
 	Created bool   `json:"created"`
-	Error   string `json:"error"`
+	Time    string `json:"time"`
+	//+optional
+	Error string `json:"error,omitempty"`
 }
 
 //+kubebuilder:object:root=true
