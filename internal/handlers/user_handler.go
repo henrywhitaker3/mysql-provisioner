@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
@@ -51,7 +52,15 @@ func (h *UserHandler) CreateOrUpdate() error {
 		return err
 	}
 
-	// TODO: add grants
+	for _, grant := range h.obj.Spec.Grants {
+		if err := db.GrantPrivilege(h.ctx, grant.Privleges, grant.On, fmt.Sprintf("'%s'@'%s'", h.obj.Spec.Name, h.obj.Spec.Host)); err != nil {
+			return err
+		}
+	}
+
+	if err := db.FlushPrivileges(h.ctx); err != nil {
+		return err
+	}
 
 	return nil
 }

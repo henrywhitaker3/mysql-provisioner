@@ -18,5 +18,5 @@ spec:
     name: password-sample
     key: password
   grants:
-    - privileges: ALL PRIVLEGES
-      to: "* . *"
+    - privileges: ALL PRIVILEGES
+      to: "bongos . *"

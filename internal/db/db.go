@@ -50,6 +50,16 @@ func (d *DB) DropUser(ctx context.Context, name, host string) error {
 	return err
 }
 
+func (d *DB) GrantPrivilege(ctx context.Context, privilege, on, to string) error {
+	_, err := d.conn.ExecContext(ctx, fmt.Sprintf("GRANT %s ON %s TO %s", privilege, on, to))
+	return err
+}
+
+func (d *DB) FlushPrivileges(ctx context.Context) error {
+	_, err := d.conn.ExecContext(ctx, "flush privileges")
+	return err
+}
+
 // Close the connection
 func (d *DB) Close() error {
 	return d.conn.Close()
