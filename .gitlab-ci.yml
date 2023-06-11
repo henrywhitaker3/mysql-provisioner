@@ -2,13 +2,18 @@ stages:
   - package
   - release
 
+.rules:
+  rules:
+    - if: $CI_COMMIT_TAG =~ "/^v[0-9]+[.][0-9]+[.][0-9]+$/"
+
 release:
   stage: release
+  extends: .rules
   image:
     name: goreleaser/goreleaser
     entrypoint: ['']
-  only:
-    - tags
+  services:
+    - docker:20.10.16-dind
   variables:
     GIT_DEPTH: 0
   script:
