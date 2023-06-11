@@ -12,9 +12,15 @@ include:
   rules:
     - if: $CI_COMMIT_TAG =~ "/^v[0-9]+[.][0-9]+[.][0-9]+$/"
 
+goreleaser_validate:
+  stage: validate
+  extends:
+    - .rules
+
 goreleaser:
   stage: release
   extends:
     - .rules
   variables:
     GL_ASDF_GORELEASER_VERSION: "1.18.2"
+
