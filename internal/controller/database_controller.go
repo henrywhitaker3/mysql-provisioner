@@ -73,8 +73,8 @@ func (r *DatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	// Check if the object is being deleted
 	if !d.ObjectMeta.DeletionTimestamp.IsZero() {
-		l.Info("mysql-provisioner.henrywhitaker.com/database being deleted")
 		if misc.ContainsString(d.GetFinalizers(), fn) {
+			l.Info("propogating database deletion")
 			if d.Status.Created {
 				if err := db.DropDB(ctx, d.Spec.Name); err != nil {
 					d.Status = mysqlprovisionerv1beta1.DatabaseStatus{
