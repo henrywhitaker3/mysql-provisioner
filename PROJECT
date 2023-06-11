@@ -7,4 +7,14 @@ layout:
 - go.kubebuilder.io/v4
 projectName: mysql-provisioner
 repo: gitlab.com/henrywhitaker3/mysql-provisioner
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: my.domain
+  group: henrywhitaker3
+  kind: MysqlConnection
+  path: gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1
+  version: v1beta1
 version: "3"

@@ -1,0 +1,27 @@
+# permissions for end users to view mysqlconnections.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: mysqlconnection-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: mysql-provisioner
+    app.kubernetes.io/part-of: mysql-provisioner
+    app.kubernetes.io/managed-by: kustomize
+  name: mysqlconnection-viewer-role
+rules:
+- apiGroups:
+  - henrywhitaker3.my.domain
+  resources:
+  - mysqlconnections
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - henrywhitaker3.my.domain
+  resources:
+  - mysqlconnections/status
+  verbs:
+  - get

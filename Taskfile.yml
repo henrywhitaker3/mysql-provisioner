@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+  deploy:
+    vars:
+      IMG: '{{ .IMG | default "henrywhitaker3/mysql-provisioner" }}'
+      TAG: '{{ .TAG | default "latest" }}'
+    cmds:
+    - make docker-build IMG={{ .IMG }}:{{ .TAG }}
+    - kind load docker-image {{ .IMG }}:{{ .TAG }}
+    - make deploy IMG={{ .IMG }}:{{ .TAG }}
+
+  undeploy:
+    - make undeploy
+    
