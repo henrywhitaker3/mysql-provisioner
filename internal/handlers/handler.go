@@ -26,7 +26,7 @@ type Handler interface {
 	// Get the objects finalizers
 	GetFinalizers() []string
 	// Remove a given finalizer from the object
-	RemoveFinalizer(string)
+	RemoveFinalizer(string) error
 	// Update the resource with a successful status
 	SuccessStatus() error
 	// Update the resource with a failed status
@@ -49,8 +49,8 @@ func RunHandler(l logr.Logger, h Handler) (reconcile.Result, error) {
 				return ctrl.Result{}, err
 			}
 
-			h.RemoveFinalizer(fn)
-			return ctrl.Result{}, nil
+			err := h.RemoveFinalizer(fn)
+			return ctrl.Result{}, err
 		}
 	}
 

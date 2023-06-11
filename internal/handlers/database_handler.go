@@ -75,8 +75,9 @@ func (h *DatabaseHandler) GetFinalizers() []string {
 	return h.obj.GetFinalizers()
 }
 
-func (h *DatabaseHandler) RemoveFinalizer(finalizer string) {
+func (h *DatabaseHandler) RemoveFinalizer(finalizer string) error {
 	controllerutil.RemoveFinalizer(h.obj, finalizer)
+	return h.client.Update(h.ctx, h.obj)
 }
 
 func (h *DatabaseHandler) SuccessStatus() error {
