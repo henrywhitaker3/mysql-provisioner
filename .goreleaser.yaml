@@ -32,7 +32,8 @@ changelog:
       - '^docs:'
       - '^test:'
 dockers:
-  - image_templates:
+  - dockerfile: goreleaser.Dockerfile
+    image_templates:
       - henrywhitaker3/mysql-provisioner:{{ .Tag }}
 
 # The lines beneath this are called `modelines`. See `:help modeline`
