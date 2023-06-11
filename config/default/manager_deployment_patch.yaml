@@ -4,6 +4,7 @@ metadata:
   name: controller-manager
   namespace: system
 spec:
+  replicas: 3
   template:
     spec:
       containers:
