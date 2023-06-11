@@ -40,6 +40,16 @@ func (d *DB) DropDB(ctx context.Context, name string) error {
 	return err
 }
 
+func (d *DB) CreateUser(ctx context.Context, name, password, host string) error {
+	_, err := d.conn.ExecContext(ctx, "CREATE USER ?@? identified by ?", name, host, password)
+	return err
+}
+
+func (d *DB) DropUser(ctx context.Context, name, host string) error {
+	_, err := d.conn.ExecContext(ctx, "DROP USER ?@?", name, host)
+	return err
+}
+
 // Close the connection
 func (d *DB) Close() error {
 	return d.conn.Close()

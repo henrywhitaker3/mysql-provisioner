@@ -124,7 +124,7 @@ func getDBForConnection(ctx context.Context, client client.Client, connRef mysql
 		return nil, err
 	}
 
-	p, err := conn.GetPassword(ctx, client)
+	p, err := conn.Spec.PasswordSecretRef.GetPassword(ctx, client, conn.Namespace)
 	if err != nil {
 		return nil, err
 	}

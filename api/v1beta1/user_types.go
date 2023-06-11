@@ -23,19 +23,33 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type UserPermission struct {
+	Privleges string `json:"privileges"`
+	On        string `json:"to"`
+}
+
 // UserSpec defines the desired state of User
 type UserSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of User. Edit user_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// The name of the user to create
+	Name string `json:"name"`
+	// The host to limit user access to
+	Host string `json:"host"`
+
+	ConnRef ConnectionRef `json:"connectionRef"`
+
+	PasswordSecretRef PasswordSecretRef `json:"passwordSecretRef"`
+
+	// The permissions to grant the user
+	Grants []UserPermission `json:"grants"`
 }
 
 // UserStatus defines the observed state of User
 type UserStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Created bool   `json:"created"`
+	Error   string `json:"error"`
 }
 
 //+kubebuilder:object:root=true

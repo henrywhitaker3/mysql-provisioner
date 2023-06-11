@@ -69,3 +69,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - mysql-provisioner.henrywhitaker.com
+  resources:
+  - users
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mysql-provisioner.henrywhitaker.com
+  resources:
+  - users/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mysql-provisioner.henrywhitaker.com
+  resources:
+  - users/status
+  verbs:
+  - get
+  - patch
+  - update

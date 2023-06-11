@@ -9,4 +9,14 @@ metadata:
     app.kubernetes.io/created-by: mysql-provisioner
   name: user-sample
 spec:
-  # TODO(user): Add fields here
+  name: sample
+  host: "%"
+  connectionRef:
+    name: connection-sample
+    namespace: default
+  passwordSecretRef:
+    name: password-sample
+    key: password
+  grants:
+    - privileges: ALL PRIVLEGES
+      to: "* . *"

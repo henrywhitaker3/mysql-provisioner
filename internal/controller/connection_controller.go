@@ -59,7 +59,7 @@ func (r *ConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		l.Info("mysql-provisioner.henrywhitaker.com/connection being deleted")
 	}
 
-	p, err := c.GetPassword(ctx, r.Client)
+	p, err := c.Spec.PasswordSecretRef.GetPassword(ctx, r.Client, c.Namespace)
 	if err != nil {
 		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
 			Status: false,

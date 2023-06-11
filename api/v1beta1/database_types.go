@@ -23,13 +23,6 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-type ConnectionRef struct {
-	// The name of the connection resource
-	Name string `json:"name"`
-	// The namespace the connection resource is in
-	Namespace string `json:"namespace"`
-}
-
 // DatabaseSpec defines the desired state of Database
 type DatabaseSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
