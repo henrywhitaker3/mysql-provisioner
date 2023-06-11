@@ -9,12 +9,24 @@ stages:
 release:
   stage: release
   extends: .rules
-  image:
-    name: goreleaser/goreleaser
-    entrypoint: ['']
+  image: docker:stable
   services:
-    - docker:20.10.16-dind
+    - docker:dind
   variables:
+    DOCKER_REGISTRY: $CI_REGISTRY
+    DOCKER_USERNAME: $CI_REGISTRY_USER
+    DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
     GIT_DEPTH: 0
-  script:
-    - goreleaser release --clean
+  script: |
+    docker run --rm --privileged \
+      -v $PWD:$PWD \
+      -w $PWD \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      -e DOCKER_USERNAME -e DOCKER_PASSWORD -e DOCKER_REGISTRY  \
+      -e GITLAB_TOKEN -e CI_REGISTRY_IMAGE \
+      -e CI_SERVER_URL \
+      ${GORELEASER_DOCKER_EXTRA_ARGS:-} \
+      goreleaser/goreleaser:latest \
+      release \
+      --clean \
+      ${GORELEASER_EXTRA_ARGS:-}
