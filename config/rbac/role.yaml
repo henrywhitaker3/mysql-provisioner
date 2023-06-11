@@ -43,3 +43,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - mysql-provisioner.henrywhitaker.com
+  resources:
+  - databases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mysql-provisioner.henrywhitaker.com
+  resources:
+  - databases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mysql-provisioner.henrywhitaker.com
+  resources:
+  - databases/status
+  verbs:
+  - get
+  - patch
+  - update

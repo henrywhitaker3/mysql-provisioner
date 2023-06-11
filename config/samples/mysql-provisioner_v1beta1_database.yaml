@@ -1,0 +1,12 @@
+apiVersion: mysql-provisioner.henrywhitaker.com/v1beta1
+kind: Database
+metadata:
+  labels:
+    app.kubernetes.io/name: database
+    app.kubernetes.io/instance: database-sample
+    app.kubernetes.io/part-of: mysql-provisioner
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: mysql-provisioner
+  name: database-sample
+spec:
+  # TODO(user): Add fields here
