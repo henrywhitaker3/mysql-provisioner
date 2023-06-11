@@ -23,19 +23,21 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type PasswordSecretRef struct {
+	// The name of the secret
+	Name string `json:"name"`
+	// The key of the field containing the password
+	Key string `json:"key"`
+}
+
 // ConnectionSpec defines the desired state of Connection
 type ConnectionSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// The user to connect to the mysql instance with.
-	User              string `json:"user"`
-	PasswordSecretRef struct {
-		// The name of the secret
-		Name string `json:"name"`
-		// The key of the field containing the password
-		Key string `json:"key"`
-	} `json:"passwordSecretRef"`
+	User              string            `json:"user"`
+	PasswordSecretRef PasswordSecretRef `json:"passwordSecretRef"`
 }
 
 // ConnectionStatus defines the observed state of Connection
