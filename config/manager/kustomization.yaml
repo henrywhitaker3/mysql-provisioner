@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: henrywhitaker3/mysql-provisioner
-  newTag: 0.1.7
+  newTag: 0.1.8

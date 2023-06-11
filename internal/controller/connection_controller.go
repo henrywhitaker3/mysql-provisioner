@@ -18,10 +18,6 @@ package controller
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
-
-	_ "github.com/go-sql-driver/mysql"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -31,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
+	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/db"
 )
 
 // ConnectionReconciler reconciles a Connection object
@@ -90,7 +87,17 @@ func (r *ConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	if err := testConnection(ctx, c, string(p)); err != nil {
+	db, err := db.NewDB(c.Spec.User, string(p), c.Spec.Host, c.Spec.Port)
+	if err != nil {
+		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
+			Status: false,
+			Error:  err.Error(),
+		}
+		err = r.Status().Update(ctx, c)
+		return ctrl.Result{}, err
+	}
+
+	if err := db.Ping(ctx); err != nil {
 		c.Status = mysqlprovisionerv1beta1.ConnectionStatus{
 			Status: false,
 			Error:  err.Error(),
@@ -111,18 +118,4 @@ func (r *ConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mysqlprovisionerv1beta1.Connection{}).
 		Complete(r)
-}
-
-func testConnection(ctx context.Context, conn *mysqlprovisionerv1beta1.Connection, password string) error {
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/information_schema", conn.Spec.User, password, conn.Spec.Host, conn.Spec.Port))
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	if err := db.PingContext(ctx); err != nil {
-		return err
-	}
-
-	return nil
 }
