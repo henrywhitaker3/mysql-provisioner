@@ -23,12 +23,11 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
 	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/db"
-	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/misc"
+	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/handlers"
 )
 
 var (
@@ -53,61 +52,8 @@ type DatabaseReconciler struct {
 func (r *DatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
 
-	d := &mysqlprovisionerv1beta1.Database{}
-	if err := r.Get(ctx, req.NamespacedName, d); err != nil {
-		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
-
-	l.Info("Processing database")
-
-	db, err := getDBForConnection(ctx, r.Client, d.Spec.ConnRef)
-	if err != nil {
-		d.Status = mysqlprovisionerv1beta1.DatabaseStatus{
-			Created: false,
-			Error:   err.Error(),
-		}
-		err := r.Status().Update(ctx, d)
-		return ctrl.Result{}, err
-	}
-	defer db.Close()
-
-	// Check if the object is being deleted
-	if !d.ObjectMeta.DeletionTimestamp.IsZero() {
-		if misc.ContainsString(d.GetFinalizers(), fn) {
-			l.Info("propogating database deletion")
-			if d.Status.Created {
-				if err := db.DropDB(ctx, d.Spec.Name); err != nil {
-					d.Status = mysqlprovisionerv1beta1.DatabaseStatus{
-						Created: d.Status.Created,
-						Error:   err.Error(),
-					}
-					err := r.Status().Update(ctx, d)
-					return ctrl.Result{}, err
-				}
-			}
-
-			controllerutil.RemoveFinalizer(d, fn)
-			err := r.Update(ctx, d)
-			return ctrl.Result{}, err
-		}
-
-		return ctrl.Result{}, nil
-	}
-
-	if err := db.CreateDB(ctx, d.Spec.Name); err != nil {
-		d.Status = mysqlprovisionerv1beta1.DatabaseStatus{
-			Created: false,
-			Error:   err.Error(),
-		}
-		err := r.Status().Update(ctx, d)
-		return ctrl.Result{}, err
-	}
-
-	d.Status = mysqlprovisionerv1beta1.DatabaseStatus{
-		Created: true,
-	}
-	err = r.Status().Update(ctx, d)
-	return ctrl.Result{}, err
+	h := handlers.NewDatabaseHandler(ctx, r.Client, req)
+	return handlers.RunHandler(l, h)
 }
 
 // SetupWithManager sets up the controller with the Manager.
