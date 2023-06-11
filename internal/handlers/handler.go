@@ -46,6 +46,7 @@ func RunHandler(l logr.Logger, h Handler) (reconcile.Result, error) {
 			l.Info("processing resource finalizer")
 
 			if err := h.Delete(); err != nil {
+				h.ErrorStatus(err)
 				return ctrl.Result{}, err
 			}
 
