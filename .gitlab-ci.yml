@@ -19,13 +19,26 @@ goreleaser:
     DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
     GIT_DEPTH: 0
   script: |
+    mkdir -p /builds/shared
+    cat > /builds/shared/docker-creds.json <<-EOF
+    {
+      "registries": [
+        {
+          "user": "$CI_REGISTRY_USER",
+          "pass": "$CI_REGISTRY_PASSWORD",
+          "registry": "$CI_REGISTRY"
+        }
+      ]
+    }
+    EOF
     docker run --rm --privileged \
       -v $PWD:$PWD \
       -w $PWD \
       -v /var/run/docker.sock:/var/run/docker.sock \
-      -e DOCKER_USERNAME -e DOCKER_PASSWORD -e DOCKER_REGISTRY  \
+      -v /builds/shared/docker-creds.json:/docker-creds.json \
       -e GITLAB_TOKEN -e CI_REGISTRY_IMAGE \
       -e CI_SERVER_URL \
+      -e DOCKER_CREDS_FILE=/docker-creds.json \
       ${GORELEASER_DOCKER_EXTRA_ARGS:-} \
       goreleaser/goreleaser:latest \
       release \
