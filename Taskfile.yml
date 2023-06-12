@@ -39,7 +39,7 @@ tasks:
         sed -i 's/version: [0-9]*\.[0-9]*\.[0-9]*/version: {{ .VERSION }}/g' charts/mysql-provisioner/Chart.yaml
       - task: generate:chart
       - git add .
-      - git commit -m "Run release task"
+      - git commit -m "Run release task" --allow-empty
       - git push
 
   release:pkg:
