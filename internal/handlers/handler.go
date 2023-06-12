@@ -15,7 +15,6 @@ import (
 
 var (
 	propFn string = "mysql-provisioner.henrywhitaker.com/propogate"
-	connFn string = "mysql-provisioner.henrywhitaker.com/connection"
 )
 
 type Handler interface {
@@ -49,7 +48,7 @@ func RunHandler(l logr.Logger, h Handler) (reconcile.Result, error) {
 	if !h.DeletionTimestampIsZero() {
 		l.Info("resource being deleted")
 		fn := h.LookAtFinalizer()
-		if misc.ContainsString(h.GetFinalizers(), fn) {
+		if fn != "" && misc.ContainsString(h.GetFinalizers(), fn) {
 			l.Info("processing resource finalizer")
 
 			if err := h.Delete(); err != nil {

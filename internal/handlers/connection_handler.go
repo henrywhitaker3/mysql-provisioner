@@ -85,7 +85,7 @@ func (h *ConnectionHandler) ErrorStatus(err error) error {
 }
 
 func (h *ConnectionHandler) LookAtFinalizer() string {
-	return connFn
+	return ""
 }
 
 func (h *ConnectionHandler) getDatabase() (*db.DB, error) {
