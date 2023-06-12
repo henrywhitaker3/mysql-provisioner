@@ -6,6 +6,7 @@ import (
 
 	mysqlprovisionerv1beta1 "github.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
 	"github.com/henrywhitaker3/mysql-provisioner/internal/db"
+	"github.com/henrywhitaker3/mysql-provisioner/internal/misc"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -36,6 +37,13 @@ func (h *ConnectionHandler) Get() error {
 }
 
 func (h *ConnectionHandler) CreateOrUpdate() error {
+	if !misc.ContainsString(h.GetFinalizers(), h.LookAtFinalizer()) {
+		controllerutil.AddFinalizer(h.obj, h.LookAtFinalizer())
+		if err := h.client.Update(h.ctx, h.obj); err != nil {
+			return err
+		}
+	}
+
 	db, err := h.getDatabase()
 	if err != nil {
 		return err
@@ -50,6 +58,7 @@ func (h *ConnectionHandler) CreateOrUpdate() error {
 }
 
 func (h *ConnectionHandler) Delete() error {
+	// TODO: logic to check if there any any records reference this connection
 	return nil
 }
 
@@ -85,7 +94,7 @@ func (h *ConnectionHandler) ErrorStatus(err error) error {
 }
 
 func (h *ConnectionHandler) LookAtFinalizer() string {
-	return ""
+	return connFn
 }
 
 func (h *ConnectionHandler) getDatabase() (*db.DB, error) {

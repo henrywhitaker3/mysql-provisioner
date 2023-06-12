@@ -15,6 +15,7 @@ import (
 
 var (
 	propFn string = "mysql-provisioner.henrywhitaker.com/propogate"
+	connFn string = "mysql-provisioner.henrywhitaker.com/connection"
 )
 
 type Handler interface {
