@@ -2,14 +2,10 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	mysqlprovisionerv1beta1 "github.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
 	"github.com/henrywhitaker3/mysql-provisioner/internal/db"
-	"github.com/henrywhitaker3/mysql-provisioner/internal/misc"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -43,13 +39,6 @@ func (h *ConnectionHandler) Get() error {
 }
 
 func (h *ConnectionHandler) CreateOrUpdate() error {
-	if !misc.ContainsString(h.GetFinalizers(), h.LookAtFinalizer()) {
-		controllerutil.AddFinalizer(h.obj, h.LookAtFinalizer())
-		if err := h.client.Update(h.ctx, h.obj); err != nil {
-			return err
-		}
-	}
-
 	db, err := h.getDatabase()
 	if err != nil {
 		return err
@@ -64,11 +53,17 @@ func (h *ConnectionHandler) CreateOrUpdate() error {
 }
 
 func (h *ConnectionHandler) Delete() error {
-	if err := h.hasResource("users"); err != nil {
+	// If we reach here, it's got the propogation finalizer in there
+	// so delete evrything related to the connection.
+	objs := []client.Object{}
+	if err := h.getSubResources(&objs); err != nil {
 		return err
 	}
-	if err := h.hasResource("databases"); err != nil {
-		return err
+
+	for _, obj := range objs {
+		if err := h.client.Delete(h.ctx, obj); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -106,24 +101,12 @@ func (h *ConnectionHandler) ErrorStatus(err error) error {
 }
 
 func (h *ConnectionHandler) LookAtFinalizer() string {
-	return connFn
+	return propFn
 }
 
-// Check if there are resources that have a ConnectionRef to this one
-// TODO: filter through the items and check that the ref is there - currently just checks for any that exist
-func (h *ConnectionHandler) hasResource(kind string) error {
-	gvr := schema.GroupVersionResource{
-		Group:    "mysql-provisioner.henrywhitaker.com",
-		Version:  "v1beta1",
-		Resource: kind,
-	}
-	rs, err := h.restClient.Resource(gvr).Namespace("").List(h.ctx, v1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	if len(rs.Items) > 0 {
-		return fmt.Errorf("%s resources depend on this connection", kind)
-	}
+// Get all resources that reference this connection
+func (h *ConnectionHandler) getSubResources(objs *[]client.Object) error {
+	// TODO: implement it
 	return nil
 }
 
