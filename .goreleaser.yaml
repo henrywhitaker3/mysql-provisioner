@@ -34,7 +34,7 @@ changelog:
 dockers:
   - dockerfile: goreleaser.Dockerfile
     image_templates:
-      - henrywhitaker3/mysql-provisioner:{{ .Tag }}
+      - ghcr.io/henrywhitaker3/mysql-provisioner:{{ .Tag }}
 
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
