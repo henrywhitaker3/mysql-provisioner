@@ -32,7 +32,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/henrywhitaker3/mysql-provisioner
-      tag: v0.1.5
+      tag: v0.1.6
     imagePullPolicy: IfNotPresent
     resources:
       limits:
