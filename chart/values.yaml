@@ -31,8 +31,8 @@ controllerManager:
         drop:
         - ALL
     image:
-      repository: henrywhitaker3/mysql-provisioner
-      tag: v0.1.0
+      repository: ghcr.io/henrywhitaker3/mysql-provisioner
+      tag: v0.1.1
     imagePullPolicy: IfNotPresent
     resources:
       limits:
