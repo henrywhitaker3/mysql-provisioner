@@ -13,6 +13,11 @@ tasks:
   undeploy:
     - make undeploy
 
+  run:
+    cmds:
+      - make install
+      - make run
+
   apply:
     cmds:
       - kubectl apply -f config/samples/mysql-provisioner_v1beta1_connection.yaml

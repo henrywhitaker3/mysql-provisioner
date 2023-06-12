@@ -20,7 +20,7 @@ import (
 	"context"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/rest"
+	"k8s.io/client-go/dynamic"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -33,8 +33,7 @@ import (
 type ConnectionReconciler struct {
 	client.Client
 	Scheme     *runtime.Scheme
-	DbClient   rest.Interface
-	UserClient rest.Interface
+	RESTClient dynamic.Interface
 }
 
 //+kubebuilder:rbac:groups=mysql-provisioner.henrywhitaker.com,resources=connections,verbs=get;list;watch;create;update;patch;delete
@@ -50,7 +49,7 @@ type ConnectionReconciler struct {
 func (r *ConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
 
-	h := handlers.NewConnectionHandler(ctx, r.Client, req, r.DbClient, r.UserClient)
+	h := handlers.NewConnectionHandler(ctx, r.Client, req, r.RESTClient)
 	return handlers.RunHandler(l, h)
 }
 

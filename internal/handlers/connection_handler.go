@@ -2,13 +2,15 @@ package handlers
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"time"
 
 	mysqlprovisionerv1beta1 "github.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
 	"github.com/henrywhitaker3/mysql-provisioner/internal/db"
 	"github.com/henrywhitaker3/mysql-provisioner/internal/misc"
-	"k8s.io/client-go/rest"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -17,19 +19,17 @@ import (
 type ConnectionHandler struct {
 	ctx        context.Context
 	client     client.Client
-	dbClient   rest.Interface
-	userClient rest.Interface
+	restClient dynamic.Interface
 	req        ctrl.Request
 	obj        *mysqlprovisionerv1beta1.Connection
 }
 
-func NewConnectionHandler(ctx context.Context, client client.Client, req ctrl.Request, db rest.Interface, user rest.Interface) *ConnectionHandler {
+func NewConnectionHandler(ctx context.Context, client client.Client, req ctrl.Request, r dynamic.Interface) *ConnectionHandler {
 	return &ConnectionHandler{
 		ctx:        ctx,
 		client:     client,
 		req:        req,
-		dbClient:   db,
-		userClient: user,
+		restClient: r,
 	}
 }
 
@@ -64,10 +64,31 @@ func (h *ConnectionHandler) CreateOrUpdate() error {
 }
 
 func (h *ConnectionHandler) Delete() error {
-	resp := h.userClient.Get().Namespace("").Do(h.ctx)
-	fmt.Println("here")
-	fmt.Println(resp)
-	fmt.Println("here")
+	user := schema.GroupVersionResource{
+		Group:    "mysql-provisioner.henrywhitaker.com",
+		Version:  "v1beta1",
+		Resource: "users",
+	}
+	users, err := h.restClient.Resource(user).Namespace("").List(h.ctx, v1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	if len(users.Items) > 0 {
+		return errors.New("users resources depend on this connection")
+	}
+	db := schema.GroupVersionResource{
+		Group:    "mysql-provisioner.henrywhitaker.com",
+		Version:  "v1beta1",
+		Resource: "databases",
+	}
+	dbs, err := h.restClient.Resource(db).Namespace("").List(h.ctx, v1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	if len(dbs.Items) > 0 {
+		return errors.New("database resources depend on this connection")
+	}
+
 	return nil
 }
 
