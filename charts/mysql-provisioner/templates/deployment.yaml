@@ -1,34 +1,34 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ include "chart.fullname" . }}-controller-manager
+  name: {{ include "mysql-provisioner.fullname" . }}-controller-manager
   labels:
     app.kubernetes.io/component: rbac
     app.kubernetes.io/created-by: mysql-provisioner
     app.kubernetes.io/part-of: mysql-provisioner
-  {{- include "chart.labels" . | nindent 4 }}
+  {{- include "mysql-provisioner.labels" . | nindent 4 }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "chart.fullname" . }}-controller-manager
+  name: {{ include "mysql-provisioner.fullname" . }}-controller-manager
   labels:
     app.kubernetes.io/component: manager
     app.kubernetes.io/created-by: mysql-provisioner
     app.kubernetes.io/part-of: mysql-provisioner
     control-plane: controller-manager
-  {{- include "chart.labels" . | nindent 4 }}
+  {{- include "mysql-provisioner.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
   selector:
     matchLabels:
       control-plane: controller-manager
-    {{- include "chart.selectorLabels" . | nindent 6 }}
+    {{- include "mysql-provisioner.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
         control-plane: controller-manager
-      {{- include "chart.selectorLabels" . | nindent 8 }}
+      {{- include "mysql-provisioner.selectorLabels" . | nindent 8 }}
       annotations:
         kubectl.kubernetes.io/default-container: manager
     spec:
@@ -92,5 +92,5 @@ spec:
           | nindent 10 }}
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: {{ include "chart.fullname" . }}-controller-manager
+      serviceAccountName: {{ include "mysql-provisioner.fullname" . }}-controller-manager
       terminationGracePeriodSeconds: 10
