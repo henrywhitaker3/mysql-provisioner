@@ -2,28 +2,34 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	mysqlprovisionerv1beta1 "github.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
 	"github.com/henrywhitaker3/mysql-provisioner/internal/db"
 	"github.com/henrywhitaker3/mysql-provisioner/internal/misc"
+	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 type ConnectionHandler struct {
-	ctx    context.Context
-	client client.Client
-	req    ctrl.Request
-	obj    *mysqlprovisionerv1beta1.Connection
+	ctx        context.Context
+	client     client.Client
+	dbClient   rest.Interface
+	userClient rest.Interface
+	req        ctrl.Request
+	obj        *mysqlprovisionerv1beta1.Connection
 }
 
-func NewConnectionHandler(ctx context.Context, client client.Client, req ctrl.Request) *ConnectionHandler {
+func NewConnectionHandler(ctx context.Context, client client.Client, req ctrl.Request, db rest.Interface, user rest.Interface) *ConnectionHandler {
 	return &ConnectionHandler{
-		ctx:    ctx,
-		client: client,
-		req:    req,
+		ctx:        ctx,
+		client:     client,
+		req:        req,
+		dbClient:   db,
+		userClient: user,
 	}
 }
 
@@ -58,7 +64,10 @@ func (h *ConnectionHandler) CreateOrUpdate() error {
 }
 
 func (h *ConnectionHandler) Delete() error {
-	// TODO: logic to check if there any any records reference this connection
+	resp := h.userClient.Get().Namespace("").Do(h.ctx)
+	fmt.Println("here")
+	fmt.Println(resp)
+	fmt.Println("here")
 	return nil
 }
 

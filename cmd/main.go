@@ -25,9 +25,12 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -89,9 +92,32 @@ func main() {
 		os.Exit(1)
 	}
 
+	dbGvk := schema.GroupVersionKind{
+		Group:   "mysql-provisioner.henrywhitaker.com",
+		Version: "v1beta1",
+		Kind:    "Database",
+	}
+	dbClient, err := apiutil.RESTClientForGVK(dbGvk, false, mgr.GetConfig(), serializer.NewCodecFactory(mgr.GetScheme()))
+	if err != nil {
+		setupLog.Error(err, "could not build rest client for database")
+		os.Exit(1)
+	}
+	userGvk := schema.GroupVersionKind{
+		Group:   "mysql-provisioner.henrywhitaker.com",
+		Version: "v1beta1",
+		Kind:    "User",
+	}
+	userClient, err := apiutil.RESTClientForGVK(userGvk, false, mgr.GetConfig(), serializer.NewCodecFactory(mgr.GetScheme()))
+	if err != nil {
+		setupLog.Error(err, "could not build rest client for user")
+		os.Exit(1)
+	}
+
 	if err = (&controller.ConnectionReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:     mgr.GetClient(),
+		Scheme:     mgr.GetScheme(),
+		DbClient:   dbClient,
+		UserClient: userClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Connection")
 		os.Exit(1)
