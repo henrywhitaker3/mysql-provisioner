@@ -5,7 +5,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.11.3
   labels:
-  {{- include "mysql-provisioner.labels" . | nindent 4 }}
+  {{- include "chart.labels" . | nindent 4 }}
 spec:
   group: mysql-provisioner.henrywhitaker.com
   names:
