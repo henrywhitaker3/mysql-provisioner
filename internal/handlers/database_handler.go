@@ -96,6 +96,10 @@ func (h *DatabaseHandler) ErrorStatus(err error) error {
 	return err
 }
 
+func (h *DatabaseHandler) LookAtFinalizer() string {
+	return propFn
+}
+
 func (h *DatabaseHandler) getDatabase() (*db.DB, error) {
 	db, err := getDBForConnection(h.ctx, h.client, h.obj.Spec.ConnRef)
 	if err != nil {

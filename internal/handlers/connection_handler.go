@@ -84,6 +84,10 @@ func (h *ConnectionHandler) ErrorStatus(err error) error {
 	return err
 }
 
+func (h *ConnectionHandler) LookAtFinalizer() string {
+	return connFn
+}
+
 func (h *ConnectionHandler) getDatabase() (*db.DB, error) {
 	db, err := getDBForConnection(h.ctx, h.client, mysqlprovisionerv1beta1.ConnectionRef{Name: h.obj.Name, Namespace: h.obj.Namespace})
 	if err != nil {
