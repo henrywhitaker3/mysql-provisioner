@@ -35,6 +35,7 @@ tasks:
         sed -i 's/newTag: v[0-9]*\.[0-9]*\.[0-9]*/newTag: v{{ .VERSION }}/g' config/manager/kustomization.yaml
       - task: generate:chart
       - git commit -m "Run releast task to update charts"
-      - git push origin master
+      - git add .
+      - git push
       - git tag v{{ .VERSION }}
       - git push origin v{{ .VERSION }}
