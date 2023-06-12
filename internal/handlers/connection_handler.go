@@ -80,7 +80,8 @@ func (h *ConnectionHandler) ErrorStatus(err error) error {
 		Error:  err.Error(),
 		Time:   time.Now().UTC().Format(time.RFC3339),
 	}
-	return h.client.SubResource("status").Update(h.ctx, h.obj)
+	h.client.SubResource("status").Update(h.ctx, h.obj)
+	return err
 }
 
 func (h *ConnectionHandler) getDatabase() (*db.DB, error) {
