@@ -6,23 +6,26 @@ import (
 
 	mysqlprovisionerv1beta1 "github.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
 	"github.com/henrywhitaker3/mysql-provisioner/internal/db"
+	"k8s.io/client-go/dynamic"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 type ConnectionHandler struct {
-	ctx    context.Context
-	client client.Client
-	req    ctrl.Request
-	obj    *mysqlprovisionerv1beta1.Connection
+	ctx        context.Context
+	client     client.Client
+	restClient dynamic.Interface
+	req        ctrl.Request
+	obj        *mysqlprovisionerv1beta1.Connection
 }
 
-func NewConnectionHandler(ctx context.Context, client client.Client, req ctrl.Request) *ConnectionHandler {
+func NewConnectionHandler(ctx context.Context, client client.Client, req ctrl.Request, r dynamic.Interface) *ConnectionHandler {
 	return &ConnectionHandler{
-		ctx:    ctx,
-		client: client,
-		req:    req,
+		ctx:        ctx,
+		client:     client,
+		req:        req,
+		restClient: r,
 	}
 }
 
@@ -50,6 +53,19 @@ func (h *ConnectionHandler) CreateOrUpdate() error {
 }
 
 func (h *ConnectionHandler) Delete() error {
+	// If we reach here, it's got the propogation finalizer in there
+	// so delete evrything related to the connection.
+	objs := []client.Object{}
+	if err := h.getSubResources(&objs); err != nil {
+		return err
+	}
+
+	for _, obj := range objs {
+		if err := h.client.Delete(h.ctx, obj); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -82,6 +98,16 @@ func (h *ConnectionHandler) ErrorStatus(err error) error {
 	}
 	h.client.SubResource("status").Update(h.ctx, h.obj)
 	return err
+}
+
+func (h *ConnectionHandler) LookAtFinalizer() string {
+	return propFn
+}
+
+// Get all resources that reference this connection
+func (h *ConnectionHandler) getSubResources(objs *[]client.Object) error {
+	// TODO: implement it
+	return nil
 }
 
 func (h *ConnectionHandler) getDatabase() (*db.DB, error) {
