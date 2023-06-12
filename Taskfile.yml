@@ -29,7 +29,7 @@ tasks:
     cmds:
       - make helm
 
-  release:
+  release:chart:
     cmds:
       - |
         sed -i 's/newTag: v[0-9]*\.[0-9]*\.[0-9]*/newTag: v{{ .VERSION }}/g' config/manager/kustomization.yaml
@@ -41,5 +41,14 @@ tasks:
       - git add .
       - git commit -m "Run release task"
       - git push
+
+  release:pkg:
+    cmds:
       - git tag v{{ .VERSION }}
       - git push origin v{{ .VERSION }}
+
+  release:
+    cmds:
+      - task: release:chart
+      - sleep 90
+      - task: release:pkg
