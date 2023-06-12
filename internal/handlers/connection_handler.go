@@ -76,7 +76,7 @@ func (h *ConnectionHandler) SuccessStatus() error {
 
 func (h *ConnectionHandler) ErrorStatus(err error) error {
 	h.obj.Status = mysqlprovisionerv1beta1.ConnectionStatus{
-		Status: true,
+		Status: false,
 		Error:  err.Error(),
 		Time:   time.Now().UTC().Format(time.RFC3339),
 	}
