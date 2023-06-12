@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   mysql-provisioner:
   - apiVersion: v2
+    appVersion: 0.1.8
+    created: "2023-06-12T14:29:01.263128174Z"
+    description: A Helm chart for Kubernetes
+    digest: 3bfc649a49fdf4a6155351984ee5cded4d44a714fd954e68654973b41c3ae85f
+    name: mysql-provisioner
+    type: application
+    urls:
+    - https://github.com/henrywhitaker3/mysql-provisioner/releases/download/mysql-provisioner-chart-0.1.8/mysql-provisioner-0.1.8.tgz
+    version: 0.1.8
+  - apiVersion: v2
     appVersion: 0.1.7
     created: "2023-06-12T14:09:14.945188373Z"
     description: A Helm chart for Kubernetes
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/henrywhitaker3/mysql-provisioner/releases/download/mysql-provisioner-chart-0.1.7/mysql-provisioner-0.1.7.tgz
     version: 0.1.7
-generated: "2023-06-12T14:09:14.945194873Z"
+generated: "2023-06-12T14:29:01.263137573Z"
