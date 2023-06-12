@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
 
 	mysqlprovisionerv1beta1 "github.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
@@ -64,29 +64,11 @@ func (h *ConnectionHandler) CreateOrUpdate() error {
 }
 
 func (h *ConnectionHandler) Delete() error {
-	user := schema.GroupVersionResource{
-		Group:    "mysql-provisioner.henrywhitaker.com",
-		Version:  "v1beta1",
-		Resource: "users",
-	}
-	users, err := h.restClient.Resource(user).Namespace("").List(h.ctx, v1.ListOptions{})
-	if err != nil {
+	if err := h.hasResource("users"); err != nil {
 		return err
 	}
-	if len(users.Items) > 0 {
-		return errors.New("users resources depend on this connection")
-	}
-	db := schema.GroupVersionResource{
-		Group:    "mysql-provisioner.henrywhitaker.com",
-		Version:  "v1beta1",
-		Resource: "databases",
-	}
-	dbs, err := h.restClient.Resource(db).Namespace("").List(h.ctx, v1.ListOptions{})
-	if err != nil {
+	if err := h.hasResource("databases"); err != nil {
 		return err
-	}
-	if len(dbs.Items) > 0 {
-		return errors.New("database resources depend on this connection")
 	}
 
 	return nil
@@ -125,6 +107,24 @@ func (h *ConnectionHandler) ErrorStatus(err error) error {
 
 func (h *ConnectionHandler) LookAtFinalizer() string {
 	return connFn
+}
+
+// Check if there are resources that have a ConnectionRef to this one
+// TODO: filter through the items and check that the ref is there - currently just checks for any that exist
+func (h *ConnectionHandler) hasResource(kind string) error {
+	gvr := schema.GroupVersionResource{
+		Group:    "mysql-provisioner.henrywhitaker.com",
+		Version:  "v1beta1",
+		Resource: kind,
+	}
+	rs, err := h.restClient.Resource(gvr).Namespace("").List(h.ctx, v1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	if len(rs.Items) > 0 {
+		return fmt.Errorf("%s resources depend on this connection", kind)
+	}
+	return nil
 }
 
 func (h *ConnectionHandler) getDatabase() (*db.DB, error) {
