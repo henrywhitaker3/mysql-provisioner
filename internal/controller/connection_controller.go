@@ -24,8 +24,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
-	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/handlers"
+	mysqlprovisionerv1beta1 "github.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
+	"github.com/henrywhitaker3/mysql-provisioner/internal/handlers"
 )
 
 // ConnectionReconciler reconciles a Connection object

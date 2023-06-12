@@ -1,4 +1,4 @@
-module gitlab.com/henrywhitaker3/mysql-provisioner
+module github.com/henrywhitaker3/mysql-provisioner
 
 go 1.19
 

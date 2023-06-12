@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	mysqlprovisionerv1beta1 "gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
-	"gitlab.com/henrywhitaker3/mysql-provisioner/internal/controller"
+	mysqlprovisionerv1beta1 "github.com/henrywhitaker3/mysql-provisioner/api/v1beta1"
+	"github.com/henrywhitaker3/mysql-provisioner/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
 

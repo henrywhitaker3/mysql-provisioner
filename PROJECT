@@ -6,7 +6,7 @@ domain: henrywhitaker.com
 layout:
 - go.kubebuilder.io/v4
 projectName: mysql-provisioner
-repo: gitlab.com/henrywhitaker3/mysql-provisioner
+repo: github.com/henrywhitaker3/mysql-provisioner
 resources:
 - api:
     crdVersion: v1
@@ -15,7 +15,7 @@ resources:
   domain: henrywhitaker.com
   group: mysql-provisioner
   kind: Connection
-  path: gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1
+  path: github.com/henrywhitaker3/mysql-provisioner/api/v1beta1
   version: v1beta1
 - api:
     crdVersion: v1
@@ -24,7 +24,7 @@ resources:
   domain: henrywhitaker.com
   group: mysql-provisioner
   kind: Database
-  path: gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1
+  path: github.com/henrywhitaker3/mysql-provisioner/api/v1beta1
   version: v1beta1
 - api:
     crdVersion: v1
@@ -33,6 +33,6 @@ resources:
   domain: henrywhitaker.com
   group: mysql-provisioner
   kind: User
-  path: gitlab.com/henrywhitaker3/mysql-provisioner/api/v1beta1
+  path: github.com/henrywhitaker3/mysql-provisioner/api/v1beta1
   version: v1beta1
 version: "3"
